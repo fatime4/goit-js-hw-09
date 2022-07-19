@@ -6,7 +6,7 @@ const startBtn = document.querySelector('button[data-start]');
 
 startBtn.setAttribute('disabled', 'disabled');
 
-let deadline = null;
+let deadline = 0;
 
 const options = {
   enableTime: true,
@@ -18,50 +18,45 @@ const options = {
       window.alert('Please choose a date in the future');
     } else {
       startBtn.removeAttribute('disabled');
-      deadline = selectedDates[0];
+      console.log(selectedDates[0]);
+      deadline = selectedDates[0].getTime();
     }
   },
 };
 
 flatpickr(inputEl, options);
 
-class Timer {
-  #intervalId = null;
-
-  constructor(rootSelector, deadline) {
-    this.rootSelector = rootSelector;
-    this.deadline = deadline;
-  }
+const timer = {
+  intervalId: null,
 
   start() {
-    this.#intervalId = setInterval(() => {
+    this.intervalId = setInterval(() => {
       const now = Date.now();
-      const diff = this.deadline - now;
+      console.log(deadline);
+      const diff = deadline - now;
 
       if (diff <= 0) {
         this.stop();
+
         return;
       }
 
       const { days, hours, minutes, seconds } = this.convertMs(diff);
 
-      this.rootSelector.querySelector('.value[data-days]').textContent =
+      document.querySelector('span[data-days]').textContent =
         this.addLeadingZero(days);
-      this.rootSelector.querySelector('.value[data-hours]').textContent =
+      document.querySelector('span[data-hours]').textContent =
         this.addLeadingZero(hours);
-      this.rootSelector.querySelector('.value[data-minutes]').textContent =
+      document.querySelector('span[data-minutes]').textContent =
         this.addLeadingZero(minutes);
-      this.rootSelector.querySelector('.value[data-seconds]').textContent =
+      document.querySelector('span[data-seconds]').textContent =
         this.addLeadingZero(seconds);
-    });
-  }
-  stop() {
-    clearInterval(this.#intervalId);
-  }
+    }, 1000);
+  },
 
-  addLeadingZero(value) {
-    return String(value).padStart(2, 0);
-  }
+  stop() {
+    clearInterval(this.intervalId);
+  },
 
   convertMs(ms) {
     const second = 1000;
@@ -79,7 +74,13 @@ class Timer {
     const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
     return { days, hours, minutes, seconds };
-  }
-}
+  },
 
-startBtn.addEventListener('click', Timer.start);
+  addLeadingZero(value) {
+    return String(value).padStart(2, 0);
+  },
+};
+
+startBtn.addEventListener('click', () => {
+  timer.start();
+});
